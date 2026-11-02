@@ -1,0 +1,298 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ontwikkelingsfasen in een projectgroep</title>
+  <link rel="stylesheet" href="./styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="./config.js"></script>
+  <script>
+    window.APP_ASPECTS = [
+  {
+    "id": 1,
+    "key": "resultaatgerichtheid",
+    "title": "Resultaatgerichtheid",
+    "intro": "Op de hoogte zijn van de leerdoelen van het project en de te leveren prestaties; weten hoe getoetst en beoordeeld wordt.",
+    "phases": {
+      "A": "Een enkeling is op de hoogte.",
+      "B": "Enkelen zijn op de hoogte.",
+      "C": "Elk groepslid is op de hoogte."
+    }
+  },
+  {
+    "id": 2,
+    "key": "betrokkenheid_loyaliteit",
+    "title": "Betrokkenheid en loyaliteit",
+    "phases": {
+      "A": "Groepsleden hebben amper interesse in hoe de organisatie draait en doen niet meer dan wat van hen wordt gevraagd.",
+      "B": "Groepsleden lezen de uitgereikte informatie, stellen daar af en toe een vraag over aan de begeleider en zijn bereid soms iets extra te doen.",
+      "C": "Groepsleden zijn er goed van op de hoogte hoe de groep ervoor staat, denken actief mee en hebben veel over voor het werk."
+    }
+  },
+  {
+    "id": 3,
+    "key": "vernieuwend_vermogen",
+    "title": "Vernieuwend vermogen",
+    "phases": {
+      "A": "De groep heeft geen interesse in verbetering of vernieuwing, komt zelf niet met ideeën, staat niet open voor suggesties van anderen.",
+      "B": "Men komt af en toe met een verbeteringsvoorstel, kijkt de kat uit de boom en neemt kennis van wat gebeurt bij andere projectgroepen.",
+      "C": "De groep komt zelf met voorstellen en suggesties voor verbetering of vernieuwing van aanpak en werkwijze en toont betrokkenheid tot en met de realisatie."
+    }
+  },
+  {
+    "id": 4,
+    "key": "klant_denken",
+    "title": "Klant-denken",
+    "phases": {
+      "A": "De groep kan zich niet verplaatsen in de positie van de klant en voelt zich niet verantwoordelijk voor het oplossen van de problemen van de klant.",
+      "B": "De groep kan verwoorden wat het probleem van de klant is en in welke richting oplossingen gezocht moeten worden.",
+      "C": "De groep heeft zich het probleem van de klant eigen gemaakt en voelt zich verantwoordelijk voor de kwaliteit van het geleverde product."
+    }
+  },
+  {
+    "id": 5,
+    "key": "communicatiepatronen",
+    "title": "Communicatiepatronen",
+    "phases": {
+      "A": "De groep heeft geen behoefte aan overleg onderling of met anderen en wil geen feedback over haar functioneren.",
+      "B": "De groep komt wekelijks bijeen omdat het zo hoort, maar weet niet goed wat te bespreken of te informeren.",
+      "C": "De groep neemt zelf het initiatief tot overleggen, betrekt daarbij zonodig personen van buiten en wil feedback over haar functioneren."
+    }
+  },
+  {
+    "id": 6,
+    "key": "samenwerking",
+    "title": "Samenwerking",
+    "phases": {
+      "A": "De groep hangt als los zand aan elkaar. Men werkt voor zichzelf en iedereen moet zichzelf maar redden.",
+      "B": "Men kent elkaar redelijk en houdt daar rekening mee; men kan elkaar gedeeltelijk vervangen.",
+      "C": "De groep heeft een hechte band, houdt rekening met elkaar en anticipeert op elkaars afwezigheid."
+    }
+  },
+  {
+    "id": 7,
+    "key": "conflicthantering",
+    "title": "Conflicthantering",
+    "phases": {
+      "A": "Tegenovergestelde meningen en gedrag zijn in de groep onbespreekbaar en discussie wordt vermeden.",
+      "B": "Tegengestelde meningen en gedrag kunnen soms wel en soms niet besproken worden.",
+      "C": "Tegengestelde meningen en gedrag zijn bespreekbaar, worden uitgepraat en leiden tot verbeteringen."
+    }
+  },
+  {
+    "id": 8,
+    "key": "sturen_coachen",
+    "title": "Sturen en coachen",
+    "phases": {
+      "A": "De groep heeft een sterke behoefte aan sturing ten aanzien van taken en verantwoordelijkheden.",
+      "B": "De groep heeft regelmatige twijfels of onenigheid en daarbij behoefte aan sturing van bovenaf.",
+      "C": "De groep stuurt zichzelf ten aanzien van taken, verantwoordelijkheden en gedrag."
+    }
+  },
+  {
+    "id": 9,
+    "key": "omgangsvormen",
+    "title": "Omgangsvormen",
+    "phases": {
+      "A": "Hoe zich te gedragen is onbespreekbaar; er is geen basis voor vertrouwen.",
+      "B": "Over een aantal zaken bestaan gemeenschappelijke regels en normen, maar niet alles is bespreekbaar.",
+      "C": "Omgangsvormen en gedrag zijn bespreekbaar; er is een brede basis van vertrouwen."
+    }
+  }
+];
+  </script>
+  <script defer src="./app.js"></script>
+</head>
+<body>
+  <header class="hero">
+    <div class="wrap">
+      <p class="eyebrow">Brightspace-ready webapp</p>
+      <h1>Ontwikkelingsfasen in een projectgroep</h1>
+      <p class="lead">
+        Studenten vullen eerst individueel in waar hun groep nu staat en waar zij individueel naartoe willen.
+        Zodra alle groepsleden hebben ingevuld, verschijnt het groepsdashboard. Daarna kiest de groep samen per
+        aspect een gezamenlijke optie A, B of C en maakt concrete afspraken voor het scrumbord.
+      </p>
+      <div id="statusBanner" class="banner info">De app controleert de verbinding...</div>
+    </div>
+  </header>
+
+  <main class="wrap stack-xl">
+    <section class="card">
+      <div class="tabs">
+        <button class="tab active" data-tab="student">Student</button>
+        <button class="tab" data-tab="docent">Docent</button>
+      </div>
+
+      <div id="studentTab" class="tab-panel active">
+        <div class="grid two">
+          <div>
+            <h2>1. Koppel jezelf aan een ronde</h2>
+            <form id="studentLinkForm" class="stack">
+              <label>
+                Rondecode
+                <input id="roundCodeInput" type="text" maxlength="20" placeholder="bijv. TEAM24" required />
+              </label>
+
+              <div class="grid three">
+                <label>
+                  Groep
+                  <select id="groupInput" required>
+                    <option value="">Kies</option>
+                    <option value="1">Groep 1</option>
+                    <option value="2">Groep 2</option>
+                    <option value="3">Groep 3</option>
+                    <option value="4">Groep 4</option>
+                    <option value="5">Groep 5</option>
+                  </select>
+                </label>
+
+                <label>
+                  Beginletter(s)
+                  <input id="initialsInput" type="text" maxlength="6" placeholder="bijv. MS" required />
+                </label>
+
+                <div class="button-col">
+                  <button class="btn primary" type="submit">Koppelen</button>
+                </div>
+              </div>
+            </form>
+
+            <div id="studentSessionCard" class="session-card hidden"></div>
+          </div>
+
+          <div>
+            <h2>Uitleg</h2>
+            <ol class="steps">
+              <li>Vul jouw rondecode, groep en beginletter(s) in.</li>
+              <li>Beantwoord alle 9 aspecten: waar staat de groep nu en waar wil jij naartoe?</li>
+              <li>Als alle groepsleden klaar zijn, zie je het dashboard van jouw groep.</li>
+              <li>Daarna kiest de groep per aspect samen A, B of C.</li>
+              <li>Tot slot maken jullie concrete afspraken. <strong>Zet die ook in het scrumbord.</strong></li>
+            </ol>
+          </div>
+        </div>
+      </div>
+
+      <div id="docentTab" class="tab-panel">
+        <h2>Docent: ronde aanmaken</h2>
+        <form id="teacherCreateForm" class="stack">
+          <div class="grid two">
+            <label>
+              Rondecode
+              <input id="teacherRoundCode" type="text" maxlength="20" placeholder="bijv. TEAM24" required />
+            </label>
+            <label>
+              Titel van deze ronde
+              <input id="teacherRoundTitle" type="text" maxlength="120" placeholder="bijv. Projectgroep blok 1" required />
+            </label>
+          </div>
+
+          <div class="grid five">
+            <label>Groep 1<input id="groupSize1" type="number" min="1" max="20" value="4" required /></label>
+            <label>Groep 2<input id="groupSize2" type="number" min="1" max="20" value="4" required /></label>
+            <label>Groep 3<input id="groupSize3" type="number" min="1" max="20" value="4" required /></label>
+            <label>Groep 4<input id="groupSize4" type="number" min="1" max="20" value="4" required /></label>
+            <label>Groep 5<input id="groupSize5" type="number" min="1" max="20" value="4" required /></label>
+          </div>
+
+          <label>
+            Extra notitie voor studenten
+            <textarea id="teacherNote" rows="3" placeholder="Bijvoorbeeld: bespreek de output in de volgende sprintreview."></textarea>
+          </label>
+
+          <div>
+            <button class="btn primary" type="submit">Ronde aanmaken</button>
+          </div>
+        </form>
+
+        <div id="teacherResult" class="teacher-result hidden"></div>
+      </div>
+    </section>
+
+    <section id="individualSection" class="card hidden">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Studentenformulier</p>
+          <h2>2. Individueel invullen</h2>
+        </div>
+        <button id="refreshButton" class="btn secondary" type="button">Gegevens verversen</button>
+      </div>
+
+      <form id="individualForm" class="stack-xl"></form>
+      <div class="actions">
+        <button id="saveIndividualButton" class="btn primary" type="button">Individuele antwoorden opslaan</button>
+      </div>
+    </section>
+
+    <section id="dashboardSection" class="card hidden">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Groepsdashboard</p>
+          <h2>3. Overzicht van jouw groep</h2>
+        </div>
+        <div id="completionPill" class="pill">0 / 0 ingevuld</div>
+      </div>
+
+      <div id="roundNote" class="banner info hidden"></div>
+      <div id="dashboardIntro" class="banner success hidden">
+        Alle verwachte groepsleden hebben ingevuld. Jullie kunnen nu samen per aspect een gezamenlijke keuze maken.
+      </div>
+      <div id="dashboardTableWrap" class="table-wrap"></div>
+    </section>
+
+    <section id="groupChoiceSection" class="card hidden">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Gezamenlijke groepskeuze</p>
+          <h2>4. Kies samen per aspect A, B of C</h2>
+        </div>
+      </div>
+
+      <div id="groupChoiceList" class="stack"></div>
+      <div class="actions">
+        <button id="saveChoicesButton" class="btn primary" type="button">Gezamenlijke keuzes opslaan</button>
+      </div>
+    </section>
+
+    <section id="actionPlanSection" class="card hidden">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Concreet plan</p>
+          <h2>5. Spreek af wat jullie gaan doen</h2>
+        </div>
+      </div>
+
+      <div class="banner warning">
+        <strong>Reminder:</strong> benoem bij <em>wanneer</em> altijd een duidelijke begin- en eindtijd. Zet de afspraak daarna in het scrumbord en spreek af <strong>wie</strong> dit doet.
+      </div>
+
+      <div id="actionPlanList" class="stack"></div>
+      <div class="actions">
+        <button id="savePlansButton" class="btn primary" type="button">Afspraken opslaan</button>
+      </div>
+    </section>
+
+    <section id="outputSection" class="card hidden">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Output</p>
+          <h2>6. Checklist en scrumbord-overzicht</h2>
+        </div>
+      </div>
+
+      <div class="grid two">
+        <div>
+          <h3>Checklist van jullie afspraken</h3>
+          <div id="checklistOutput" class="output-box"></div>
+        </div>
+        <div>
+          <h3>Wat moet in het scrumbord?</h3>
+          <div id="scrumOutput" class="output-box"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
